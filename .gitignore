@@ -1,0 +1,4 @@
+*.resolved
+*.xcbkptlist
+*.xcworkspacedata
+.swiftpm/xcode/xcuserdata
