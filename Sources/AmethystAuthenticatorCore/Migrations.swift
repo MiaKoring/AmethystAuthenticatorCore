@@ -9,8 +9,8 @@
 
 public typealias Account = AAuthenticatorModelSchema_V0_1_0.Account
 
-enum AAuthenticatorMigrations: SchemaMigrationPlan {
-    static let schemas: [any VersionedSchema.Type] = [AAuthenticatorModelSchema_V0_1_0.self]
+public enum AAuthenticatorMigrations: SchemaMigrationPlan {
+    public static let schemas: [any VersionedSchema.Type] = [AAuthenticatorModelSchema_V0_1_0.self]
     
-    static let stages: [MigrationStage] = []
+    public static let stages: [MigrationStage] = []
 }

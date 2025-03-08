@@ -35,19 +35,20 @@ public class IntegrationTests {
         try keychain.removeAll()
     }
     
+    @MainActor
     func testAccountCreationWithoutCollision() throws {
         let _ = try Account(service: testSite,
-                          username: testUsername,
-                          notes: testNotes,
-                          password: testPassword,
-                          allAccounts: testAccountsWithoutCollision)
+                            username: testUsername,
+                            comment: testNotes,
+                            password: testPassword,
+                            allAccounts: testAccountsWithoutCollision)
     }
     
     func testAccountCreationWithCollision() throws {
         do {
             let _ = try Account(service: testSite,
                                 username: testUsername,
-                                notes: testNotes,
+                                comment: testNotes,
                                 password: testPassword,
                                 allAccounts: testAccountsWithCollision)
         } catch {
@@ -62,7 +63,7 @@ public class IntegrationTests {
         do {
             let _ = try Account(service: testSite,
                                 username: testUsername + "({#totp})",
-                                notes: testNotes,
+                                comment: testNotes,
                                 password: testPassword,
                                 allAccounts: testAccountsWithoutCollision)
             try assertTrue(false, messageOnFail: "Didn't throw")
@@ -78,7 +79,7 @@ public class IntegrationTests {
     func testAccountProperties() throws {
         let acc = try Account(service: testSite,
                           username: testUsername,
-                          notes: testNotes,
+                          comment: testNotes,
                           password: testPassword,
                           allAccounts: testAccountsWithoutCollision)
         //test after initialization
@@ -108,7 +109,7 @@ public class IntegrationTests {
         try assertTrue(acc.password == testPassword + "4", messageOnFail: "stored and expected password are different after password change")
         
         //test getting and setting comment works
-        try assertTrue(acc.getComment() == testNotes, messageOnFail: "stored and expected comment are different")
+        try assertTrue(acc.getComment() == testNotes && acc.comment == testNotes, messageOnFail: "stored and expected comment are different")
         acc.setComment(to: testNotes + "1")
         try assertTrue(acc.getComment() == testNotes + "1", messageOnFail: "stored and expected comment are different after change")
         

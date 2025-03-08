@@ -17,7 +17,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/kishikawakatsumi/KeychainAccess.git", exact: .init(4, 2, 2)),
-        .package(url: "https://github.com/lachlanbell/SwiftOTP.git", exact: .init(3, 0, 2))
+        .package(url: "https://github.com/lachlanbell/SwiftOTP.git", exact: .init(3, 0, 2)),
     ],
     targets: [
         .target(name: "AmethystAuthenticatorCore", dependencies: [

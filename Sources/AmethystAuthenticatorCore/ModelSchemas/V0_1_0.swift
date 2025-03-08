@@ -24,7 +24,7 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
          */
         public var aliases: [String]
         public private(set) var username: String
-        var password: String? {
+        public var password: String? {
             get {
                 getPassword()
             }
@@ -32,6 +32,16 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
                 setPassword(to: newValue)
             }
         }
+        
+        public var comment: String? {
+            get {
+                getComment()
+            }
+            set {
+                setComment(to: newValue ?? "")
+            }
+        }
+        
         public private(set) var totp: Bool
         public private(set) var createdAt: Date = Date.now
         public private(set) var deletedAt: Date? = nil
@@ -52,10 +62,10 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         /**
          throws AAuthenticationError or a Keychain related Error
          */
-        public convenience init(service: String, username: String, notes: String, password: String, totp: Bool = false, allAccounts: [Account]) throws {
+        public convenience init(service: String, username: String, comment: String, password: String, totp: Bool = false, allAccounts: [Account]) throws {
             try Account.checkUsername(username: username, service: service, allAccounts: allAccounts)
             self.init(service: service, username: username, totp: totp)
-            try saveToKeychain(service: service, username: username, password: password, notes: notes)
+            try saveToKeychain(service: service, username: username, password: password, comment: comment)
         }
         
         
@@ -77,14 +87,14 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         }
         
         // initial save to keychain on creation
-        private func saveToKeychain(service: String, username: String, password: String, notes: String) throws {
+        private func saveToKeychain(service: String, username: String, password: String, comment: String) throws {
             if self.service != service {
                 let keychain = Keychain.create(for: service)
                 keychain[username] = nil
             }
             let keychain = Keychain.create(for: service)
             try keychain
-                .comment(notes)
+                .comment(comment)
                 .set(password, key: username)
         }
         
