@@ -20,6 +20,13 @@ let package = Package(
         .package(url: "https://github.com/lachlanbell/SwiftOTP.git", exact: .init(3, 0, 2))
     ],
     targets: [
-        .target(name: "AmethystAuthenticatorCore", dependencies: [.byName(name: "KeychainAccess"), .byName(name: "SwiftOTP")])
+        .target(name: "AmethystAuthenticatorCore", dependencies: [
+            .byName(name: "KeychainAccess"),
+            .byName(name: "SwiftOTP")
+        ]),
+        .testTarget(name: "Tests", dependencies: [
+            .byName(name: "AmethystAuthenticatorCore"),
+            .byName(name: "KeychainAccess")
+        ], path: "Tests")
     ]
 )

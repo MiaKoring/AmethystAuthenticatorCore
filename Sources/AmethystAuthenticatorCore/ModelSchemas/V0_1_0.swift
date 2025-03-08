@@ -39,9 +39,9 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         /**
          initializer for swiftdata
          */
-        public init(id: UUID = UUID(), services: String, aliases: [String] = [], username: String, totp: Bool, createdAt: Date = Date(), deletedAt: Date? = nil) {
+        public init(id: UUID = UUID(), service: String, aliases: [String] = [], username: String, totp: Bool, createdAt: Date = Date(), deletedAt: Date? = nil) {
             self.id = id
-            self.service = services
+            self.service = service
             self.aliases = aliases
             self.username = username
             self.totp = totp
@@ -54,7 +54,7 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
          */
         public convenience init(service: String, username: String, notes: String, password: String, totp: Bool = false, allAccounts: [Account]) throws {
             try Account.checkUsername(username: username, service: service, allAccounts: allAccounts)
-            self.init(services: service, username: username, totp: totp)
+            self.init(service: service, username: username, totp: totp)
             try saveToKeychain(service: service, username: username, password: password, notes: notes)
         }
         
@@ -91,16 +91,20 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         /**
          change Username, automatically updates the storage in the keychain to the new name
          */
-        public func setUsername(to newValue: String, allAccounts: [Account]) throws {
-            try Account.checkUsername(username: newValue, service: self.service, allAccounts: allAccounts)
-            
+        public func setUsername(to newValue: String, allAccounts: [Account], context: ModelContext) throws {
             let keychain = Keychain.create(for: self.service)
+            
             let comment = keychain[attributes: self.username]?.comment
             let password = keychain[self.username]
             let totp = keychain["\(self.username)({#totp})"]
             
             keychain[self.username] = nil
             keychain["\(self.username)({#totp})"] = nil
+            
+            try context.transaction {
+                try Account.checkUsername(username: newValue, service: self.service, allAccounts: allAccounts)
+                self.username = newValue
+            }
             
             if let password {
                 try keychain
@@ -150,8 +154,18 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
             self.totp = false
         }
         
+        public func getComment() -> String? {
+            let keychain = Keychain.create(for: self.service)
+            return keychain[attributes: self.username]?.comment
+        }
         
-        private static func checkUsername(username: String, service: String, allAccounts: [Account]) throws {
+        public func setComment(to newComment: String) {
+            let keychain = Keychain.create(for: self.service).comment(newComment)
+            keychain[self.username] = self.password
+        }
+        
+        
+        static func checkUsername(username: String, service: String, allAccounts: [Account]) throws {
             //reserved for internal use, to save and retrieve OTP secrets
             guard !username.hasSuffix("({#totp})") else {
                 throw AAuthenticationError.usernameHasReservedSuffix
