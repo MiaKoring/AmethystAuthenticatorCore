@@ -17,13 +17,13 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
     
     @Model
     public final class Account {
-        public private(set) var id: UUID
-        public private(set) var service: String
+        public private(set) var id: UUID = UUID()
+        public private(set) var service: String = ""
         /**
          alternative domains where this account can be used to log in
          */
-        public var aliases: [String]
-        public private(set) var username: String
+        public var aliases: [String] = []
+        public private(set) var username: String = ""
         public var password: String? {
             get {
                 getPassword()
@@ -42,7 +42,7 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
             }
         }
         
-        public private(set) var totp: Bool
+        public private(set) var totp: Bool = false
         public private(set) var createdAt: Date = Date.now
         public private(set) var deletedAt: Date? = nil
         
