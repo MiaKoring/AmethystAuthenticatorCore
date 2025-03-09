@@ -6,7 +6,7 @@ Core of the Password-Manager used in [Amethyst Browser](https://amethystbrowser.
 AmethystAuthenticationCore handles all the logic of managing Passwords and TOTP Secrets and storing them safely in the keychain. When building a Password-Manager, you will only need to build the GUI around it.
 
 ### License
-This package is licensed under AGPLv3, read more in the LICENSE File
+This package is licensed under MIT, read more in the LICENSE File
 
 ### Requirements
 - Swift 6 compatible
