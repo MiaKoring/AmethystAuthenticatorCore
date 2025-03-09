@@ -35,6 +35,16 @@ class UnitTests: XCTestCase {
         }
     }
     
+    func testTitleFetch() async throws {
+        let title = try await Account.getTitle(from: "amethystbrowser.de")
+        XCTAssertTrue(title == "Amethyst")
+    }
+    
+    func testFaviconFetch() async throws {
+        let image = try await Account.getImage(for: "google.com")
+        XCTAssertTrue(image != nil)
+    }
+    
     func testCheckDuplicateUsernameOnService() throws {
         do {
             try Account.checkUsername(username: "tester",

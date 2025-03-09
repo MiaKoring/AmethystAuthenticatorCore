@@ -1,18 +1,20 @@
 //
-//  Models.swift
-//  AmethystAuthenticatorModels
+//  V0_2_0.swift
+//  AmethystAuthenticatorCore
 //
-//  Created by Mia Koring on 07.03.25.
+//  Created by Mia Koring on 09.03.25.
 //
+
 @preconcurrency import SwiftData
 import Foundation
 @preconcurrency import KeychainAccess
 import SwiftOTP
+import SwiftUI
 
-public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
+public enum AAuthenticatorModelSchema_V0_2_0: VersionedSchema {
     public static let models: [any PersistentModel.Type] = [Account.self]
     
-    public static let versionIdentifier: Schema.Version = Schema.Version(0, 1, 0)
+    public static let versionIdentifier: Schema.Version = Schema.Version(0, 2, 0)
     
     @Model
     public final class Account {
@@ -21,7 +23,7 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         /**
          alternative domains where this account can be used to log in
          */
-        public var aliases: [String] = []
+        public private(set) var aliases: [String] = []
         public private(set) var username: String = ""
         public var password: String? {
             get {
@@ -43,19 +45,25 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         
         public private(set) var totp: Bool = false
         public private(set) var createdAt: Date = Date.now
+        public private(set) var editedAt: Date?
         public private(set) var deletedAt: Date? = nil
+        public private(set) var image: Data?
+        public private(set) var title: String?
         
         /**
          initializer for swiftdata
          */
-        public init(id: UUID = UUID(), service: String, aliases: [String] = [], username: String, totp: Bool, createdAt: Date = Date(), deletedAt: Date? = nil) {
+        public init(id: UUID = UUID(), service: String, aliases: [String] = [], username: String, totp: Bool, createdAt: Date = Date(), editedAt: Date? = nil, deletedAt: Date? = nil, image: Data? = nil, title: String? = nil) {
             self.id = id
             self.service = service
             self.aliases = aliases
             self.username = username
             self.totp = totp
             self.createdAt = createdAt
+            self.editedAt = editedAt
             self.deletedAt = deletedAt
+            self.image = image
+            self.title = title
         }
         
         /**
@@ -63,6 +71,7 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
          */
         public convenience init(service: String, username: String, comment: String, password: String, totp: Bool = false, allAccounts: [Account]) throws {
             try Account.checkUsername(username: username, service: service, allAccounts: allAccounts)
+            
             self.init(service: service, username: username, totp: totp)
             try saveToKeychain(service: service, username: username, password: password, comment: comment)
         }
@@ -107,23 +116,36 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
             let password = keychain[self.username]
             let totp = keychain["\(self.username)({#totp})"]
             
-            keychain[self.username] = nil
-            keychain["\(self.username)({#totp})"] = nil
-            
-            try context.transaction {
-                try Account.checkUsername(username: newValue, service: self.service, allAccounts: allAccounts)
-                self.username = newValue
-            }
-            
-            if let password {
-                try keychain
-                    .comment(comment ?? "")
-                    .set(password, key: newValue)
-            }
-            if let totp {
-                try keychain
-                    .comment(comment ?? "")
-                    .set(totp, key: "\(newValue)({#totp})")
+            do {
+                try context.transaction {
+                    if let password {
+                        try keychain
+                            .comment(comment ?? "")
+                            .set(password, key: newValue)
+                    }
+                    if let totp {
+                        try keychain
+                            .comment(comment ?? "")
+                            .set(totp, key: "\(newValue)({#totp})")
+                    }
+                    try Account.checkUsername(username: newValue, service: self.service, allAccounts: allAccounts)
+                    self.username = newValue
+                }
+                self.editedAt = Date.now
+            } catch {
+                keychain[newValue] = nil
+                keychain["\(newValue)({#totp})"] = nil
+                
+                if let password {
+                    try keychain
+                        .comment(comment ?? "")
+                        .set(password, key: self.username)
+                }
+                if let totp {
+                    try keychain
+                        .comment(comment ?? "")
+                        .set(totp, key: "\(self.username)({#totp})")
+                }
             }
         }
         
@@ -133,11 +155,13 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         }
         
         public func setPassword(to newValue: String?) {
+            self.editedAt = Date.now
             let keychain = Keychain.create(for: self.service)
             keychain[self.username] = newValue
         }
         
         public func setTOTPSecret(to secret: String) {
+            self.editedAt = Date.now
             let keychain = Keychain.create(for: self.service)
             keychain["\(self.username)({#totp})"] = secret
             self.totp = true
@@ -158,6 +182,7 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         }
         
         public func removeTOTPSecret() {
+            self.editedAt = Date.now
             let keychain = Keychain.create(for: self.service)
             keychain["\(self.username)({#totp})"] = nil
             self.totp = false
@@ -169,8 +194,19 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
         }
         
         public func setComment(to newComment: String) {
+            self.editedAt = Date.now
             let keychain = Keychain.create(for: self.service).comment(newComment)
             keychain[self.username] = self.password
+        }
+        
+        public func setImage(to imageData: Data?) {
+            self.editedAt = Date.now
+            self.image = imageData
+        }
+        
+        public func setTitle(to newTitle: String) {
+            self.editedAt = Date.now
+            self.title = title
         }
         
         
@@ -184,6 +220,49 @@ public enum AAuthenticatorModelSchema_V0_1_0: VersionedSchema {
             }) else {
                 throw AAuthenticationError.usernameAlreadyInUseOnService
             }
+        }
+        
+        public static func getTitle(from urlString: String) async throws -> String? {
+            guard let url = URL(string: "https://\(urlString)") else {
+                throw URLError(.badURL)
+            }
+            
+            let (data, _) = try await URLSession.shared.data(from: url)
+            
+            guard let htmlString = String(data: data, encoding: .utf8) else {
+                return nil
+            }
+            
+            // extractTitle
+            if let titleRange = htmlString.range(of: "<title>"),
+               let titleEndRange = htmlString.range(of: "</title>") {
+                let startIndex = titleRange.upperBound
+                let endIndex = titleEndRange.lowerBound
+                return String(htmlString[startIndex..<endIndex])
+            } else {
+                return nil
+            }
+        }
+        
+        public static func getImage(for urlString: String) async throws -> Data? {
+            guard let url = URL(string: "https://\(urlString)")?.appending(path: "favicon.ico") else {
+                throw URLError(.badURL)
+            }
+            
+            let (data, _) = try await URLSession.shared.data(from: url)
+#if os(macOS)
+            guard let _ = NSImage(data: data) else {
+                return nil
+            }
+            return data
+#elseif canImport(UIKit)
+            guard let _ = UIImage(data: data) else {
+                return nil
+            }
+            return data
+#else
+            return nil
+#endif
         }
         
     }

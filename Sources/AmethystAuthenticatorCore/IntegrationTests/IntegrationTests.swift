@@ -38,10 +38,10 @@ public class IntegrationTests {
     @MainActor
     func testAccountCreationWithoutCollision() throws {
         let _ = try Account(service: testSite,
-                            username: testUsername,
-                            comment: testNotes,
-                            password: testPassword,
-                            allAccounts: testAccountsWithoutCollision)
+                                  username: testUsername,
+                                  comment: testNotes,
+                                  password: testPassword,
+                                  allAccounts: testAccountsWithoutCollision)
     }
     
     func testAccountCreationWithCollision() throws {
