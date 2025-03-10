@@ -23,7 +23,7 @@ public enum AAuthenticatorModelSchema_V0_3_0: VersionedSchema {
         /**
          alternative domains where this account can be used to log in
          */
-        public private(set) var aliases: [String] = []
+        public var aliases: [String] = []
         public private(set) var username: String = ""
         public var password: String? {
             get {
