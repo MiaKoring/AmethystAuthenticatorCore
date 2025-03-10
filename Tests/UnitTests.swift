@@ -36,8 +36,8 @@ class UnitTests: XCTestCase {
     }
     
     func testTitleFetch() async throws {
-        let title = try await Account.getTitle(from: "amethystbrowser.de")
-        XCTAssertTrue(title == "Amethyst")
+        let title = try await Account.getTitle(from: "google.com")
+        XCTAssertTrue(title == "Google")
     }
     
     func testFaviconFetch() async throws {
