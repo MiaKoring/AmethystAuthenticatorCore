@@ -19,10 +19,10 @@ public class IntegrationTests {
     let testTotpSecret = "JBSWY3DPEHPK3PXP"
     let newTestTotpSecret = "5QXK64OSGNYKX75R"
     let testAccountsWithoutCollision = [
-        Account(service: "google.com", username: "tester", totp: false)
+        Account(service: "google.com", username: "tester", totp: false, strength: 0.7)
     ]
     var testAccountsWithCollision: [Account] {
-        [Account(service: testSite, username: testUsername, totp: false)]
+        [Account(service: testSite, username: testUsername, totp: false, strength: 0.7)]
     }
     
     public init() {
@@ -41,7 +41,8 @@ public class IntegrationTests {
                                   username: testUsername,
                                   comment: testNotes,
                                   password: testPassword,
-                                  allAccounts: testAccountsWithoutCollision)
+                            allAccounts: testAccountsWithoutCollision,
+                            strength: 0.7)
     }
     
     func testAccountCreationWithCollision() throws {
@@ -50,7 +51,8 @@ public class IntegrationTests {
                                 username: testUsername,
                                 comment: testNotes,
                                 password: testPassword,
-                                allAccounts: testAccountsWithCollision)
+                                allAccounts: testAccountsWithCollision,
+                                strength: 0.7)
         } catch {
             guard let error = error as? AAuthenticationError else {
                 throw AIntegrationTestError.withMessage("unexpected error: \(error)")
@@ -65,7 +67,8 @@ public class IntegrationTests {
                                 username: testUsername + "({#totp})",
                                 comment: testNotes,
                                 password: testPassword,
-                                allAccounts: testAccountsWithoutCollision)
+                                allAccounts: testAccountsWithoutCollision,
+                                strength: 0.7)
             try assertTrue(false, messageOnFail: "Didn't throw")
         } catch {
             guard let error = error as? AAuthenticationError else {
@@ -81,7 +84,7 @@ public class IntegrationTests {
                           username: testUsername,
                           comment: testNotes,
                           password: testPassword,
-                          allAccounts: testAccountsWithoutCollision)
+                              allAccounts: testAccountsWithoutCollision, strength: 0.7)
         //test after initialization
         try assertTrue(acc.password == testPassword, messageOnFail: "Password not equal")
         

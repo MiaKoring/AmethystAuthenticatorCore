@@ -24,7 +24,7 @@ class UnitTests: XCTestCase {
         do {
             try Account.checkUsername(username: "tester({#totp})",
                                       service: "amethystbrowser.de",
-                                      allAccounts: [Account(service: "google.com", username: "tester", totp: false)])
+                                      allAccounts: [Account(service: "google.com", username: "tester", totp: false, strength: 0.7)])
             XCTFail("should have thrown")
         } catch {
             guard let error = error as? AAuthenticationError else {
@@ -49,7 +49,7 @@ class UnitTests: XCTestCase {
         do {
             try Account.checkUsername(username: "tester",
                                       service: "amethystbrowser.de",
-                                      allAccounts: [Account(service: "amethystbrowser.de", username: "tester", totp: false)])
+                                      allAccounts: [Account(service: "amethystbrowser.de", username: "tester", totp: false, strength: 0.7)])
             XCTFail("should have thrown")
         } catch {
             guard let error = error as? AAuthenticationError else {
