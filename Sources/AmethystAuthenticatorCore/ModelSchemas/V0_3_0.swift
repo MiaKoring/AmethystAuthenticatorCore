@@ -208,7 +208,7 @@ public enum AAuthenticatorModelSchema_V0_3_0: VersionedSchema {
         
         public func setTitle(to newTitle: String) {
             self.editedAt = Date.now
-            self.title = title
+            self.title = newTitle
         }
         
         
