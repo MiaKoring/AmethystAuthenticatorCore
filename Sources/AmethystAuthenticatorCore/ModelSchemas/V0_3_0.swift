@@ -212,13 +212,13 @@ public enum AAuthenticatorModelSchema_V0_3_0: VersionedSchema {
         }
         
         
-        static func checkUsername(username: String, service: String, allAccounts: [Account]) throws {
+        static func checkUsername(username: String, service: String, allAccounts: [Account], excludedID: UUID? = nil) throws {
             //reserved for internal use, to save and retrieve OTP secrets
             guard !username.hasSuffix("({#totp})") else {
                 throw AAuthenticationError.usernameHasReservedSuffix
             }
             guard !allAccounts.contains(where: {
-                $0.service == service && $0.username == username
+                $0.service == service && $0.username == username && $0.id != excludedID
             }) else {
                 throw AAuthenticationError.usernameAlreadyInUseOnService
             }
