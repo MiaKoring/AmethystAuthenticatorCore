@@ -130,7 +130,7 @@ public enum AAuthenticatorModelSchema_V0_3_0: VersionedSchema {
                             .comment(comment ?? "")
                             .set(totp, key: "\(newValue)({#totp})")
                     }
-                    try Account.checkUsername(username: newValue, service: self.service, allAccounts: allAccounts)
+                    try Account.checkUsername(username: newValue, service: self.service, allAccounts: allAccounts, excludedID: self.id)
                     self.username = newValue
                 }
                 self.editedAt = Date.now

@@ -40,6 +40,7 @@ class UnitTests: XCTestCase {
         XCTAssertTrue(title == "Google")
     }
     
+    
     func testFaviconFetch() async throws {
         let image = try await Account.getImage(for: "google.com")
         XCTAssertTrue(image != nil)
@@ -57,6 +58,17 @@ class UnitTests: XCTestCase {
                 return
             }
             XCTAssertTrue(error == AAuthenticationError.usernameAlreadyInUseOnService)
+        }
+    }
+    
+    func testCheckDuplicateUsernameOnServiceWithIDExclusion() throws {
+        do {
+            let account = Account(service: "amethystbrowser.de", username: "tester", totp: false, strength: 0.7)
+            try Account.checkUsername(username: "tester",
+                                      service: "amethystbrowser.de",
+                                      allAccounts: [account], excludedID: account.id)
+        } catch {
+            XCTFail("shouldn't throw")
         }
     }
 }
