@@ -138,15 +138,27 @@ public enum AAuthenticatorModelSchema_V0_3_0: VersionedSchema {
                 keychain[newValue] = nil
                 keychain["\(newValue)({#totp})"] = nil
                 
-                if let password {
-                    try keychain
-                        .comment(comment ?? "")
-                        .set(password, key: self.username)
+                do {
+                    if let password {
+                        try keychain
+                            .comment(comment ?? "")
+                            .set(password, key: self.username)
+                    }
+                    if let totp {
+                        try keychain
+                            .comment(comment ?? "")
+                            .set(totp, key: "\(self.username)({#totp})")
+                    }
+                } catch {
+#if DEBUG
+                    print(error.localizedDescription)
+#endif
+                    throw AAuthenticationError.somethingWentWrongOnKeychain
                 }
-                if let totp {
-                    try keychain
-                        .comment(comment ?? "")
-                        .set(totp, key: "\(self.username)({#totp})")
+                if let error = error as? AAuthenticationError {
+                    throw error
+                } else {
+                    throw AAuthenticationError.somethingWentWrongOnKeychain
                 }
             }
         }
