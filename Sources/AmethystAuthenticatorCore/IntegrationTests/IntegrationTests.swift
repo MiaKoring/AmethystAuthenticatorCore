@@ -127,6 +127,13 @@ public class IntegrationTests {
         try assertTrue(acc.password == nil && acc.getTOTPSecret() == nil, messageOnFail: "Corresponding keychaindata wasn't deleted")
     }
     
+    func testSameUserDifferentServers() throws {
+        let account = try Account(service: "google.com", username: "test@gmail.com", comment: "", password: "abc", allAccounts: [], strength: 0.7)
+        let secondAccount = try Account(service: "amethystbrowser.de", username: "test@gmail.com", comment: "", password: "def", allAccounts: [], strength: 0.7)
+        try assertTrue(account.password == "abc", messageOnFail: "first account password is wrong: \(account.password)")
+        try assertTrue(secondAccount.password == "def", messageOnFail: "second account password is wrong: \(secondAccount.password)")
+    }
+    
     private func assertTrue(_ value: Bool, messageOnFail: String) throws {
         if !value {
             throw AIntegrationTestError.withMessage(messageOnFail)
@@ -138,6 +145,7 @@ public class IntegrationTests {
         case testAccountCreationWithCollision
         case testAccountCreationWithSuffix
         case testAccountProperties
+        case testSameUserDifferentServers
     }
 }
 
@@ -189,6 +197,18 @@ public extension IntegrationTests.TestCases {
             {
                 do {
                     try IntegrationTests().testAccountProperties()
+                    return .success(true)
+                } catch {
+                    guard let error = error as? AIntegrationTestError else {
+                        return.failure(.withMessage("unknown error: \(error.localizedDescription)"))
+                    }
+                    return .failure(error)
+                }
+            }
+        case .testSameUserDifferentServers:
+            {
+                do {
+                    try IntegrationTests().testSameUserDifferentServers()
                     return .success(true)
                 } catch {
                     guard let error = error as? AIntegrationTestError else {

@@ -13,7 +13,7 @@ public extension Keychain {
         icloud sync: enabled, accessibility: when unlocked
      */
     static func create(for server: String) -> Keychain {
-        let keychain = self.init(server: server, protocolType: .https, authenticationType: .htmlForm)
+        let keychain = self.init(service: server)
         return keychain
             .synchronizable(true)
             .accessibility(.whenUnlocked)
