@@ -71,4 +71,20 @@ class UnitTests: XCTestCase {
             XCTFail("shouldn't throw")
         }
     }
+    
+    func testPasswordGenerator() {
+        let generator = PasswordGenerator()
+        let password = generator.generatePassword()
+        print(password)
+        let segmentlessPassword = generator.generatePassword(insertSegments: false)
+        print(segmentlessPassword)
+        XCTAssertTrue(generator.isValidPassword(segmentlessPassword))
+        XCTAssertTrue(generator.isValidPassword(password))
+    }
+    
+    func testIsValidPassword() {
+        let generator = PasswordGenerator()
+        XCTAssertFalse(generator.isValidPassword("aBadjp-"))
+        XCTAssertTrue(generator.isValidPassword("aB1"))
+    }
 }
