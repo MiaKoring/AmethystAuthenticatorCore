@@ -18,7 +18,9 @@ public struct PasswordGenerator {
     private let segmentLength = 6
     private let segmentCount = 3
     
-    public init(){}
+    public init(){
+        
+    }
     
     /// Generates a password in the format XXXXXX-XXXXXX-XXXXXX
     /// - Returns: A random password
