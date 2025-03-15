@@ -12,7 +12,6 @@ public struct PasswordGenerator {
     private let uppercaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     private let lowercaseLetters = "abcdefghijklmnopqrstuvwxyz"
     private let numbers = "1234567890"
-    private let specialCharacters = "-_.!:;,#$%^&*"
     
     // Configuration
     private let segmentLength = 6
@@ -28,24 +27,13 @@ public struct PasswordGenerator {
         var segments = [String]()
         
         // Place at least one uppercase letter, one lowercase letter, and one number
-        var requiredChars = {
-            if !insertSegments {
-                return [
+        var requiredChars =  [
                     uppercaseLetters.randomElement()!,
                     lowercaseLetters.randomElement()!,
                     numbers.randomElement()!
                 ]
-            }
-            return [
-                uppercaseLetters.randomElement()!,
-                lowercaseLetters.randomElement()!,
-                numbers.randomElement()!,
-                specialCharacters.randomElement()!
-            ]
-        }()
-        
         // All available characters for the remaining positions
-        let allChars = uppercaseLetters + lowercaseLetters + numbers + (insertSegments ? "": specialCharacters)
+        let allChars = uppercaseLetters + lowercaseLetters + numbers
         
         // Generate each segment
         for _ in 0..<segmentCount {
