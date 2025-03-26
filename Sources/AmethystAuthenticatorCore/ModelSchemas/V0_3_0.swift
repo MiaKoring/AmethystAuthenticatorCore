@@ -255,10 +255,12 @@ public enum AAuthenticatorModelSchema_V0_3_0: VersionedSchema {
                let titleEndRange = htmlString.range(of: "</title>") {
                 let startIndex = titleRange.upperBound
                 let endIndex = titleEndRange.lowerBound
-                return String(htmlString[startIndex..<endIndex])
-            } else {
-                return nil
+                
+                if startIndex <= endIndex {
+                    return String(htmlString[startIndex..<endIndex])
+                }
             }
+            return nil
         }
         
         public static func getImage(for urlString: String) async throws -> Data? {
